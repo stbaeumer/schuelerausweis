@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="schuelerausweis.Datenzugriff" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAIAAIAAAAAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Datenzugriff.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Form1" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAQAAhBEACAAAAGAAACBCAASBAQAASgBAKQEYAAAAiE=</HashCode>
+      <FileName>Form1.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Klasse">
+    <Position X="8.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Klasse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Klasses" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Klasses.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Program" Collapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Schueler" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAgAAAAgEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Schueler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Schuelers" Collapsed="true">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Schuelers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Properties.Resources" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>kQIAIAAAYgACAAICAIJBkAABJQRgAAACYHBJABgABIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="schuelerausweis.Properties.Settings" Collapsed="true">
+    <Position X="4" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAACCAAgAAAAALAAAAAABAAAAAAAEAABIAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

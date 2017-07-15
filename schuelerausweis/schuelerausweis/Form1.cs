@@ -18,10 +18,11 @@ namespace schuelerausweis
         Klasses klasses;
         Schuelers schuelers;
         List<Schueler> gewählteSchüler = new List<Schueler>();
-        string zuletztGewählteKlasse = "";
+        string aktiveKlasse = "";
         List<Schueler> gewählteSchülerDieserKlasse = new List<Schueler>();
-
-
+        List<int> listBox1_selection = new List<int>();
+        public List<Schueler> schuelerDerAktivenKlasse { get; private set; }
+        
         public Form1()
         {
             InitializeComponent();                                           
@@ -37,11 +38,7 @@ namespace schuelerausweis
             listBoxKlasse.DataSource = (from k in klasses select k.NameAtlantis).ToList();
             listBoxKlasse.SetSelected(0, false);
         }
-
-        List<int> listBox1_selection = new List<int>();
-
-        public List<Schueler> schuelerDerAktivenKlasse { get; private set; }
-
+                
         private void ListBoxKlasse_Click(object sender, EventArgs e)
         {
             if (listBoxKlasse.SelectedItem != null)
@@ -59,8 +56,9 @@ namespace schuelerausweis
 
             foreach (int index in new List<int>(selection))
                 if (!sic.Contains(index)) selection.Remove(index);
-            zuletztGewählteKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
-            schuelerDerAktivenKlasse = (from s in schuelers where s.Klasse == zuletztGewählteKlasse select s).ToList();
+
+            aktiveKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
+            schuelerDerAktivenKlasse = (from s in schuelers where s.Klasse == aktiveKlasse select s).ToList();
             listBoxSchueler.DataSource = (from s in schuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
                 
             for (int i = 0; i < schuelerDerAktivenKlasse.Count; i++)
@@ -87,7 +85,8 @@ namespace schuelerausweis
                 for (int i = 0; i < listBoxSchueler.Items.Count; i++)
                 {
                     listBoxSchueler.SetSelected(i, false);
-                }
+                    gewählteSchüler.Remove(schuelerDerAktivenKlasse[i]);
+                }                
             }
             else
             {
@@ -96,7 +95,11 @@ namespace schuelerausweis
                 for (int i = 0; i < listBoxSchueler.Items.Count; i++)
                 {
                     listBoxSchueler.SetSelected(i, true);
-                }
+                    if (!(from g in gewählteSchüler where g.Nachname == schuelerDerAktivenKlasse[i].Nachname && g.Vorname == schuelerDerAktivenKlasse[i].Vorname && schuelerDerAktivenKlasse[i].Klasse == g.Klasse select g).Any())
+                    {
+                        gewählteSchüler.Add(schuelerDerAktivenKlasse[i]);
+                    }
+                }                
             }
             listBoxSchueler.EndUpdate();
         }
@@ -118,14 +121,21 @@ namespace schuelerausweis
         private void ListBoxSchueler_Click(object sender, EventArgs e)
         {
             TrackSelectionChange((ListBox)sender, listBox1_selection);
-            //gewählteSchüler.Add(zuletztGewählterSchüler);
 
-            gewählteSchülerDieserKlasse = new List<Schueler>();
+            // Wenn der Schüler bereits in der Liste der gwählten Schüler existiert, wird er entfernt, sonst hinzugefügt.
 
-            foreach (var item in listBoxSchueler.SelectedItems)
-            {
-                gewählteSchülerDieserKlasse.Add((from s in schuelerDerAktivenKlasse where item.ToString().Contains(s.Vorname) && item.ToString().Contains(s.Nachname) && s.Klasse == zuletztGewählteKlasse select s).FirstOrDefault());
-            }
+            //if (!(from g in gewählteSchüler where g.Nachname == ge .Nachname && g.Vorname == schuelerDerAktivenKlasse[i].Vorname && schuelerDerAktivenKlasse[i].Klasse == g.Klasse select g).Any())
+            //{
+            //    gewählteSchüler.Add(schuelerDerAktivenKlasse[i]);
+            //}
+
+
+            //gewählteSchülerDieserKlasse = new List<Schueler>();
+
+            //foreach (var item in listBoxSchueler.SelectedItems)
+            //{
+            //    gewählteSchülerDieserKlasse.Add((from s in schuelerDerAktivenKlasse where item.ToString().Contains(s.Vorname) && item.ToString().Contains(s.Nachname) && s.Klasse == aktiveKlasse select s).FirstOrDefault());
+            //}
 
             btnDrucken.Text = gewählteSchüler.Count + " Schüler aus " + (listBoxKlasse.SelectedItems.Count.ToString()) + " Klassen drucken.";
         }

@@ -59,18 +59,20 @@ namespace schuelerausweis
 
             foreach (int index in new List<int>(selection))
                 if (!sic.Contains(index)) selection.Remove(index);
-
-            if (lb.Name == "listBoxKlasse")
+            zuletztGewählteKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
+            schuelerDerAktivenKlasse = (from s in schuelers where s.Klasse == zuletztGewählteKlasse select s).ToList();
+            listBoxSchueler.DataSource = (from s in schuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
+                
+            for (int i = 0; i < schuelerDerAktivenKlasse.Count; i++)
             {
-                zuletztGewählteKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
-                schuelerDerAktivenKlasse = (from s in schuelers where s.Klasse == zuletztGewählteKlasse select s).ToList();
-                listBoxSchueler.DataSource = (from s in schuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
-                listBoxSchueler.SetSelected(0, false);
-            }
-            else
-            {
-                //var schuelersDieserKlasse = (from s in schuelers where s.Klasse == zuletztGewählteKlasse select s).ToList();
-                //zuletztGewählterSchüler = schuelersDieserKlasse[listBox1_selection[listBox1_selection.Count - 1]];
+                if ((from g in gewählteSchüler where g.Nachname == schuelerDerAktivenKlasse[i].Nachname && g.Vorname == schuelerDerAktivenKlasse[i].Vorname && g.Klasse == schuelerDerAktivenKlasse[0].Klasse select g).Any())
+                {
+                    listBoxSchueler.SetSelected(i, true);
+                }
+                else
+                {
+                    listBoxSchueler.SetSelected(0, false);
+                }                  
             }
         }
 

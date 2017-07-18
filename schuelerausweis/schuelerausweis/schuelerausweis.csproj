@@ -55,10 +55,10 @@
     <ApplicationIcon>schuelerfoto.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>6E8FA6D358F09362571A5A84A3C7E4ADD2AED529</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>3912C86F6939F8430AB11AA77AE0227DD958FF8A</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>schuelerfoto_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>schuelerausweis_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -76,7 +76,8 @@
     <Reference Include="Klasse">
       <HintPath>..\..\..\klasse\Klasse\Klasse\bin\Release\Klasse.dll</HintPath>
     </Reference>
-    <Reference Include="Schueler">
+    <Reference Include="Schueler, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\schueler\Schueler\Schueler\bin\Release\Schueler.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -135,6 +136,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="schuelerausweis_TemporaryKey.pfx" />
     <None Include="schuelerfoto_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

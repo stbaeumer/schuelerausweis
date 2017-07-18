@@ -75,26 +75,26 @@
             this.listBoxKlasse.FormattingEnabled = true;
             this.listBoxKlasse.Location = new System.Drawing.Point(12, 12);
             this.listBoxKlasse.Name = "listBoxKlasse";
-            this.listBoxKlasse.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.listBoxKlasse.Size = new System.Drawing.Size(168, 212);
+            this.listBoxKlasse.Size = new System.Drawing.Size(129, 212);
             this.listBoxKlasse.TabIndex = 24;
             this.listBoxKlasse.Click += new System.EventHandler(this.ListBoxKlasse_Click);
             // 
             // listBoxSchueler
             // 
             this.listBoxSchueler.FormattingEnabled = true;
-            this.listBoxSchueler.Location = new System.Drawing.Point(186, 12);
+            this.listBoxSchueler.Location = new System.Drawing.Point(147, 12);
             this.listBoxSchueler.Name = "listBoxSchueler";
             this.listBoxSchueler.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
-            this.listBoxSchueler.Size = new System.Drawing.Size(176, 186);
+            this.listBoxSchueler.Size = new System.Drawing.Size(215, 186);
             this.listBoxSchueler.TabIndex = 25;
             this.listBoxSchueler.Click += new System.EventHandler(this.ListBoxSchueler_Click);
             // 
             // btnAlle
             // 
-            this.btnAlle.Location = new System.Drawing.Point(186, 201);
+            this.btnAlle.Enabled = false;
+            this.btnAlle.Location = new System.Drawing.Point(147, 201);
             this.btnAlle.Name = "btnAlle";
-            this.btnAlle.Size = new System.Drawing.Size(176, 23);
+            this.btnAlle.Size = new System.Drawing.Size(215, 23);
             this.btnAlle.TabIndex = 26;
             this.btnAlle.Text = "Alle auswählen";
             this.btnAlle.UseVisualStyleBackColor = true;

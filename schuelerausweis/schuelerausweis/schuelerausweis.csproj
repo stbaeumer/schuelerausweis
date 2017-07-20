@@ -52,7 +52,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>schuelerfoto.ico</ApplicationIcon>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>3912C86F6939F8430AB11AA77AE0227DD958FF8A</ManifestCertificateThumbprint>
@@ -166,6 +166,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="favicon.ico" />
     <Content Include="uploadicon.ico" />
     <Content Include="schuelerfoto.ico" />
     <Content Include="symbol.ico" />

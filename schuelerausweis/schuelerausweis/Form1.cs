@@ -10,6 +10,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Globalization;
+using System.ComponentModel;
+using System.Threading;
 
 // Published under the terms of GNU GENERAL PUBLIC LICENSE Version 3 
 // © 2017 Stefan Bäumer
@@ -18,50 +20,64 @@ namespace schuelerausweis
 {
     public partial class Form1 : Form
     {
+        BackgroundWorker worker = new BackgroundWorker();
+        SynchronizationContext _syncContext;
+
         Klasses klasses;
         Schuelers schuelers;
         List<Schueler> gewählteSchüler = new List<Schueler>();
         string aktiveKlasse = "";
-        //List<Schueler> gewählteSchülerDieserKlasse = new List<Schueler>();
         List<int> listBox1_selection = new List<int>();
+
         public List<Schueler> schuelerDerAktivenKlasse { get; private set; }
         public Schueler aktiverSchueler { get; private set; }
-
+        
         public Form1()
         {
-            InitializeComponent();                                           
+            InitializeComponent();
+            _syncContext = SynchronizationContext.Current;
         }
         
         private void Form1_Load(object sender, EventArgs e)
+        {        
+            toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM";
+            worker.WorkerReportsProgress = true;
+            worker.WorkerSupportsCancellation = true;
+            worker.DoWork += new DoWorkEventHandler(HandleDoWork);
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(HandleWorkerCompleted);
+            worker.ProgressChanged += new ProgressChangedEventHandler(HandleProgressChanged);
+            worker.RunWorkerAsync();
+        }
+
+        private void HandleDoWork(object sender, DoWorkEventArgs e)
         {
             int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
-
             klasses = new Klasses(aktSj);
-            schuelers = new Schuelers(aktSj);
+            schuelers = new Schuelers(aktSj);            
+        }
 
+        private void HandleProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            SendOrPostCallback callback = new SendOrPostCallback((o) =>
+            {
+                lblStartup.Text = lblStartup.Text + ".";
+            });
+            _syncContext.Send(callback, null);
+        }
+
+        private void HandleWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
             listBoxKlasse.DataSource = (from k in klasses select k.NameAtlantis).ToList();
             listBoxKlasse.SetSelected(0, false);
-            toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM";
+            lblStartup.Visible = false;         
         }
-                
+
         private void ListBoxKlasse_Click(object sender, EventArgs e)
         {
             if (listBoxKlasse.SelectedItem != null)
             {                
                 TrackSelectionChange((ListBox)sender, listBox1_selection);
-            }
-                        
-            //for (int i = 0; i < listBoxKlasse.Items.Count; i++)
-            //{
-            //    if ((from s in gewählteSchüler where s.Klasse == listBoxKlasse.Items[i].ToString() select s).Any() || listBoxKlasse.Items[i].ToString() == aktiveKlasse)
-            //    {
-            //        listBoxKlasse.SetSelected(i, true);
-            //    }
-            //    else
-            //    {
-            //        listBoxKlasse.SetSelected(i, false);
-            //    }
-            //}
+            }                        
             btnAlle.Text = "Alle Schüler der " + aktiveKlasse + " auswählen";
             btnAlle.Enabled = true;
         }
@@ -130,87 +146,152 @@ namespace schuelerausweis
         {            
             var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
 
+            int breiteGesamt = 1200;
+            int höheGesamt = Convert.ToInt32(0.6 * breiteGesamt);
+            int imageX = Convert.ToInt32(breiteGesamt * 0.7);
+            int imageY = Convert.ToInt32(höheGesamt * 0.25);
+            int linkeSpalteX = Convert.ToInt32(breiteGesamt * 0.05);
+            int rechteSpalteX = Convert.ToInt32(breiteGesamt * 0.4);
+            int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt);
+            int zweiteZeileY = Convert.ToInt32(höheGesamt * 0.45);
+            int dritteZeileY = Convert.ToInt32(höheGesamt * 0.6);
+            int imageW = Convert.ToInt32(breiteGesamt * 0.3);
+            int schriftGroß = Convert.ToInt32(höheGesamt * 0.07);
+            int schriftKlein = Convert.ToInt32(höheGesamt * 0.02);
+
             for (int i = 0; i < g.Count(); i++)
             {
                 PrintDocument pd = new PrintDocument();
-                pd.DefaultPageSettings.PaperSize = new PaperSize("A4", 826, 1169);
+                pd.DefaultPageSettings.PaperSize = new PaperSize("CreditCard", breiteGesamt, höheGesamt);
                 pd.PrinterSettings.PrintToFile = true;
                 pd.PrinterSettings.PrinterName = "Adobe PDF";
                 pd.PrintPage += delegate (object o, PrintPageEventArgs ee)
                 {
-                    Image img_orig = Image.FromFile(gewählteSchüler[i].BildPfad);
-                    var img = ResizeImage(img_orig, new Size(150, 200)); // Originale 300 * 400
-                    Point loc = new Point(430, 70);
-                    ee.Graphics.DrawImage(img, loc);
-                    ee.Graphics.DrawString("Name/Name/Nom", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 100, 100);
-                    ee.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 100, 108);
+                    if (gewählteSchüler[i].BildPfad != null)
+                    {
+                        Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
+                        //var img1 = ResizeImage(imageW, (Int32)(image.Height / image.Width * imageW), image); // Originale 300 * 400
+                        Point loc1 = new Point(imageX, imageY);
+                        ee.Graphics.DrawImage(image, loc1);
+                    }
+                    else
+                    {
+                        string text = "Der Ausweis ist nur zusammen mit einem Lichtbildausweis gültig.";
+                        using (Font font = new Font("Tahoma", schriftKlein, FontStyle.Regular, GraphicsUnit.Point))
+                        {
+                            RectangleF rectF = new RectangleF(imageX, imageY, Convert.ToInt32(breiteGesamt * 0.2), Convert.ToInt32(höheGesamt * 0.3));
+                            StringFormat formatter = new StringFormat()
+                            {
+                                Alignment = StringAlignment.Center,
+                                LineAlignment = StringAlignment.Center
+                            };                            
+                            ee.Graphics.DrawString(text, font, Brushes.Black, rectF, formatter);
+                            ee.Graphics.DrawRectangle(Pens.Black, Rectangle.Round(rectF));
+                        }
+                    }
+                    
+                    ee.Graphics.DrawString("Name/Name/Nom", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
+                    ee.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
 
-                    ee.Graphics.DrawString("Geburtsdatum/Date of birth", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 300, 100);
-                    ee.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 300, 108);
+                    ee.Graphics.DrawString("Geburtsdatum/Date of birth/Date de naissance", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, zweiteZeileY);
+                    ee.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, zweiteZeileY + Convert.ToInt32(0.01 * höheGesamt));
 
-                    ee.Graphics.DrawString("Gültig bis/Valid until/Date d`expiration", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 100, 150);
-                    ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 100, 158);
+                    ee.Graphics.DrawString("Gültig bis/Valid until/Date d`expiration", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
+                    ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
 
-                    img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                    loc = new Point(300, 150);
+                    var img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
+                    var loc = new Point(rechteSpalteX, zweiteZeileY);
                     ee.Graphics.DrawImage(img, loc);
                 };
 
                 pd.Print();
             }
         }
-                
-        private void PrintPage(object o, PrintPageEventArgs e)
-        {            
-            Image img_orig = Image.FromFile(gewählteSchüler[0].BildPfad);
-            var img = ResizeImage(img_orig, new Size(150, 200)); // Originale 300 * 400
-            Point loc = new Point(430, 70);
-            e.Graphics.DrawImage(img, loc);
-            e.Graphics.DrawString("Name/Name/Nom", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 100, 100);
-            e.Graphics.DrawString(gewählteSchüler[0].Vorname + " " + gewählteSchüler[0].Nachname, new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 100, 108);
 
-            e.Graphics.DrawString("Geburtsdatum/Date of birth", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 300, 100);
-            e.Graphics.DrawString(gewählteSchüler[0].Geburtsdatum.ToShortDateString(), new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 300, 108);
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
 
-            e.Graphics.DrawString("Gültig bis/Valid until/Date d`expiration", new Font("Tahoma", 6, FontStyle.Italic), Brushes.Black, 100, 150);
-            e.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[0].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[0].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", 12, FontStyle.Bold), Brushes.Black, 100, 158);
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-            loc = new Point(300, 150);
-            e.Graphics.DrawImage(img, loc);
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
         }
 
-        private static Image ResizeImage(System.Drawing.Image imgToResize, Size size)
+        public Image ResizeImage(int newWidth, int newHeight, Image image)
         {
-            //Get the image current width
-            int sourceWidth = imgToResize.Width;
-            //Get the image current height
-            int sourceHeight = imgToResize.Height;
+            try
+            {
+                int sourceWidth = image.Width;
+                int sourceHeight = image.Height;
 
-            float nPercent = 0;
-            float nPercentW = 0;
-            float nPercentH = 0;
-            //Calulate  width with new desired size
-            nPercentW = ((float)size.Width / (float)sourceWidth);
-            //Calculate height with new desired size
-            nPercentH = ((float)size.Height / (float)sourceHeight);
+                if (sourceWidth < sourceHeight)
+                {
+                    int buff = newWidth;
 
-            if (nPercentH < nPercentW)
-                nPercent = nPercentH;
-            else
-                nPercent = nPercentW;
-            //New Width
-            int destWidth = (int)(sourceWidth * nPercent);
-            //New Height
-            int destHeight = (int)(sourceHeight * nPercent);
+                    newWidth = newHeight;
+                    newHeight = buff;
+                }
 
-            Bitmap b = new Bitmap(destWidth, destHeight);
-            Graphics g = Graphics.FromImage((System.Drawing.Image)b);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            // Draw image with new width and height
-            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-            g.Dispose();
-            return (System.Drawing.Image)b;
+                int sourceX = 0, sourceY = 0, destX = 0, destY = 0;
+                float nPercent = 0, nPercentW = 0, nPercentH = 0;
+
+                nPercentW = ((float)newWidth / (float)sourceWidth);
+                nPercentH = ((float)newHeight / (float)sourceHeight);
+                if (nPercentH < nPercentW)
+                {
+                    nPercent = nPercentH;
+                    destX = System.Convert.ToInt16((newWidth - (sourceWidth * nPercent)) / 2);
+                }
+                else
+                {
+                    nPercent = nPercentW;
+                    destY = System.Convert.ToInt16((newHeight - (sourceHeight * nPercent)) / 2);
+                }
+
+                int destWidth = (int)(sourceWidth * nPercent);
+                int destHeight = (int)(sourceHeight * nPercent);
+
+                Bitmap bmPhoto = new Bitmap(newWidth, newHeight, PixelFormat.Format24bppRgb);
+
+                bmPhoto.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+                Graphics grPhoto = Graphics.FromImage(bmPhoto);
+                grPhoto.Clear(Color.Black);
+                grPhoto.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+
+                grPhoto.DrawImage(image, new Rectangle(destX, destY, destWidth, destHeight), new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight), GraphicsUnit.Pixel);
+                grPhoto.Dispose();
+                image.Dispose();
+                return bmPhoto;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private static Image CropImage(Image img, Rectangle cropArea)
+        {
+            using (Bitmap bmpImage = new Bitmap(img))
+            {
+                return bmpImage.Clone(cropArea, bmpImage.PixelFormat);
+            }
         }
 
         private void ListBoxSchueler_Click(object sender, EventArgs e)

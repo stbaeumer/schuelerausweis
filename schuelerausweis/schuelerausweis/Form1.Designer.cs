@@ -36,6 +36,7 @@
             this.listBoxKlasse = new System.Windows.Forms.ListBox();
             this.listBoxSchueler = new System.Windows.Forms.ListBox();
             this.btnAlle = new System.Windows.Forms.Button();
+            this.lblStartup = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -100,12 +101,25 @@
             this.btnAlle.UseVisualStyleBackColor = true;
             this.btnAlle.Click += new System.EventHandler(this.BtnAlle_Click);
             // 
+            // lblStartup
+            // 
+            this.lblStartup.BackColor = System.Drawing.Color.ForestGreen;
+            this.lblStartup.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblStartup.ForeColor = System.Drawing.SystemColors.HighlightText;
+            this.lblStartup.Location = new System.Drawing.Point(12, 9);
+            this.lblStartup.Name = "lblStartup";
+            this.lblStartup.Size = new System.Drawing.Size(350, 322);
+            this.lblStartup.TabIndex = 27;
+            this.lblStartup.Text = "Datenbank einlesen ...";
+            this.lblStartup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(376, 368);
+            this.Controls.Add(this.lblStartup);
             this.Controls.Add(this.btnAlle);
             this.Controls.Add(this.listBoxSchueler);
             this.Controls.Add(this.listBoxKlasse);
@@ -114,7 +128,7 @@
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Schülerausweis";
+            this.Text = "Schülerausweis drucken";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -131,6 +145,7 @@
         private System.Windows.Forms.ListBox listBoxSchueler;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.Button btnAlle;
+        private System.Windows.Forms.Label lblStartup;
     }
 }
 

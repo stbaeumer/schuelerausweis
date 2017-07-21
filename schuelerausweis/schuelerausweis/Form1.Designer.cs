@@ -110,7 +110,7 @@
             this.lblStartup.Name = "lblStartup";
             this.lblStartup.Size = new System.Drawing.Size(350, 322);
             this.lblStartup.TabIndex = 27;
-            this.lblStartup.Text = "Datenbank einlesen ...";
+            this.lblStartup.Text = "Datenbank laden ...\r\nBitte warten ...";
             this.lblStartup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form1

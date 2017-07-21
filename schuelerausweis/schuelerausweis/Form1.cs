@@ -7,8 +7,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.ComponentModel;
 using System.Threading;
@@ -146,7 +144,7 @@ namespace schuelerausweis
         {            
             var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
 
-            int breiteGesamt = 1200;
+            int breiteGesamt = 1100;
             int höheGesamt = Convert.ToInt32(0.6 * breiteGesamt);
             int imageX = Convert.ToInt32(breiteGesamt * 0.7);
             int imageY = Convert.ToInt32(höheGesamt * 0.25);
@@ -158,28 +156,29 @@ namespace schuelerausweis
             int imageW = Convert.ToInt32(breiteGesamt * 0.3);
             int schriftGroß = Convert.ToInt32(höheGesamt * 0.07);
             int schriftKlein = Convert.ToInt32(höheGesamt * 0.02);
+            int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
 
+            PrintDocument pd = new PrintDocument();
+            pd.DefaultPageSettings.PaperSize = new PaperSize("CreditCard", breiteGesamt, höheGesamt);
+            pd.PrinterSettings.PrintToFile = true;
+            pd.PrinterSettings.PrinterName = "Adobe PDF";
+            
             for (int i = 0; i < g.Count(); i++)
             {
-                PrintDocument pd = new PrintDocument();
-                pd.DefaultPageSettings.PaperSize = new PaperSize("CreditCard", breiteGesamt, höheGesamt);
-                pd.PrinterSettings.PrintToFile = true;
-                pd.PrinterSettings.PrinterName = "Adobe PDF";
                 pd.PrintPage += delegate (object o, PrintPageEventArgs ee)
                 {
                     if (gewählteSchüler[i].BildPfad != null)
                     {
                         Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
-                        //var img1 = ResizeImage(imageW, (Int32)(image.Height / image.Width * imageW), image); // Originale 300 * 400
                         Point loc1 = new Point(imageX, imageY);
                         ee.Graphics.DrawImage(image, loc1);
                     }
                     else
                     {
                         string text = "Der Ausweis ist nur zusammen mit einem Lichtbildausweis gültig.";
-                        using (Font font = new Font("Tahoma", schriftKlein, FontStyle.Regular, GraphicsUnit.Point))
+                        using (Font font = new Font("Tahoma", schriftFoto, FontStyle.Regular, GraphicsUnit.Point))
                         {
-                            RectangleF rectF = new RectangleF(imageX, imageY, Convert.ToInt32(breiteGesamt * 0.2), Convert.ToInt32(höheGesamt * 0.3));
+                            RectangleF rectF = new RectangleF(imageX, imageY, Convert.ToInt32(breiteGesamt * 0.25), Convert.ToInt32(höheGesamt * 0.55));
                             StringFormat formatter = new StringFormat()
                             {
                                 Alignment = StringAlignment.Center,
@@ -200,100 +199,13 @@ namespace schuelerausweis
                     ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
 
                     var img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                    var loc = new Point(rechteSpalteX, zweiteZeileY);
+                    var loc = new Point(rechteSpalteX, zweiteZeileY + Convert.ToInt32(0.05 * höheGesamt));
                     ee.Graphics.DrawImage(img, loc);
                 };
-
                 pd.Print();
             }
         }
-
-        public static Bitmap ResizeImage(Image image, int width, int height)
-        {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
-
-            return destImage;
-        }
-
-        public Image ResizeImage(int newWidth, int newHeight, Image image)
-        {
-            try
-            {
-                int sourceWidth = image.Width;
-                int sourceHeight = image.Height;
-
-                if (sourceWidth < sourceHeight)
-                {
-                    int buff = newWidth;
-
-                    newWidth = newHeight;
-                    newHeight = buff;
-                }
-
-                int sourceX = 0, sourceY = 0, destX = 0, destY = 0;
-                float nPercent = 0, nPercentW = 0, nPercentH = 0;
-
-                nPercentW = ((float)newWidth / (float)sourceWidth);
-                nPercentH = ((float)newHeight / (float)sourceHeight);
-                if (nPercentH < nPercentW)
-                {
-                    nPercent = nPercentH;
-                    destX = System.Convert.ToInt16((newWidth - (sourceWidth * nPercent)) / 2);
-                }
-                else
-                {
-                    nPercent = nPercentW;
-                    destY = System.Convert.ToInt16((newHeight - (sourceHeight * nPercent)) / 2);
-                }
-
-                int destWidth = (int)(sourceWidth * nPercent);
-                int destHeight = (int)(sourceHeight * nPercent);
-
-                Bitmap bmPhoto = new Bitmap(newWidth, newHeight, PixelFormat.Format24bppRgb);
-
-                bmPhoto.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-                Graphics grPhoto = Graphics.FromImage(bmPhoto);
-                grPhoto.Clear(Color.Black);
-                grPhoto.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-                grPhoto.DrawImage(image, new Rectangle(destX, destY, destWidth, destHeight), new Rectangle(sourceX, sourceY, sourceWidth, sourceHeight), GraphicsUnit.Pixel);
-                grPhoto.Dispose();
-                image.Dispose();
-                return bmPhoto;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        private static Image CropImage(Image img, Rectangle cropArea)
-        {
-            using (Bitmap bmpImage = new Bitmap(img))
-            {
-                return bmpImage.Clone(cropArea, bmpImage.PixelFormat);
-            }
-        }
-
+        
         private void ListBoxSchueler_Click(object sender, EventArgs e)
         {
             foreach (var item in listBoxSchueler.Items)

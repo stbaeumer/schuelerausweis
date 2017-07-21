@@ -52,7 +52,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <ApplicationIcon>A.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>3912C86F6939F8430AB11AA77AE0227DD958FF8A</ManifestCertificateThumbprint>
@@ -148,9 +148,6 @@
     <None Include="Resources\pbxDbConnectOk.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\pbxDbConnectFailed1.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\pbxInfo.png" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +163,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="A.ico" />
     <Content Include="favicon.ico" />
     <Content Include="uploadicon.ico" />
     <Content Include="schuelerfoto.ico" />

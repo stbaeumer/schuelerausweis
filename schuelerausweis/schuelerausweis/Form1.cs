@@ -2,7 +2,6 @@
 using System.Data;
 using System.Windows.Forms;
 using Klasse;
-using Schüler;
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing.Printing;
@@ -181,12 +180,12 @@ namespace schuelerausweis
             {
                 var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
 
-                int breiteGesamt = 1100;
-                int höheGesamt = Convert.ToInt32(0.6 * breiteGesamt);
-                int imageX = Convert.ToInt32(breiteGesamt * 0.7);
+                int breiteGesamt = 1016;
+                int höheGesamt = 642;// //Convert.ToInt32(0.6 * breiteGesamt);
+                int imageX = Convert.ToInt32(breiteGesamt * 0.6);                
                 int imageY = Convert.ToInt32(höheGesamt * 0.25);
                 int linkeSpalteX = Convert.ToInt32(breiteGesamt * 0.05);
-                int rechteSpalteX = Convert.ToInt32(breiteGesamt * 0.4);
+                int rechteSpalteX = Convert.ToInt32(breiteGesamt * 0.3);
                 int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt);
                 int zweiteZeileY = Convert.ToInt32(höheGesamt * 0.45);
                 int dritteZeileY = Convert.ToInt32(höheGesamt * 0.6);
@@ -196,14 +195,33 @@ namespace schuelerausweis
                 int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
 
                 PrintDocument pd = new PrintDocument();
-                pd.DefaultPageSettings.PaperSize = new PaperSize("CreditCard", breiteGesamt, höheGesamt);
-                pd.PrinterSettings.PrintToFile = true;
+                pd.PrinterSettings.PrinterName = "Magicard Rio Pro";
+                pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", breiteGesamt, höheGesamt);
+                pd.PrinterSettings.PrintToFile = false;
                 pd.PrinterSettings.PrinterName = "Adobe PDF";
+
+                //var devmode = pd.PrinterSettings.GetHdevmode();
+                //pd.PrinterSettings.SetHdevmode(devmode);
+                
 
                 for (int i = 0; i < g.Count(); i++)
                 {
                     pd.PrintPage += delegate (object o, PrintPageEventArgs ee)
                     {
+                        var img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
+                        var loc = new Point(rechteSpalteX, zweiteZeileY + Convert.ToInt32(0.05 * höheGesamt));
+
+                        ee.Graphics.DrawImage(img, loc);
+
+                        ee.Graphics.DrawString("Name/Name", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
+                        ee.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+
+                        ee.Graphics.DrawString("Geburtsdatum/Date of birth", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, zweiteZeileY);
+                        ee.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, zweiteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+
+                        ee.Graphics.DrawString("Gültig bis/Valid until", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
+                        ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+                        
                         if (gewählteSchüler[i].BildPfad != null)
                         {
                             Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
@@ -225,26 +243,13 @@ namespace schuelerausweis
                                 ee.Graphics.DrawRectangle(Pens.Black, Rectangle.Round(rectF));
                             }
                         }
-
-                        ee.Graphics.DrawString("Name/Name/Nom", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
-                        ee.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-
-                        ee.Graphics.DrawString("Geburtsdatum/Date of birth/Date de naissance", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, zweiteZeileY);
-                        ee.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, zweiteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-
-                        ee.Graphics.DrawString("Gültig bis/Valid until/Date d`expiration", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
-                        ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-
-                        var img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                        var loc = new Point(rechteSpalteX, zweiteZeileY + Convert.ToInt32(0.05 * höheGesamt));
-                        ee.Graphics.DrawImage(img, loc);
                     };
                     pd.Print();
                 }
             }
             catch (Exception ex)
             {
-                lblStartup.Text = ex.Message;
+                MessageBox.Show(ex.ToString());
             }            
         }
         

@@ -179,9 +179,9 @@ namespace schuelerausweis
             try
             {
                 var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
-
-                int breiteGesamt = 1016;
-                int höheGesamt = 642;// //Convert.ToInt32(0.6 * breiteGesamt);
+                int faktor = 3;
+                int breiteGesamt = Convert.ToInt32(339 * faktor);
+                int höheGesamt = Convert.ToInt32(214 * faktor);
                 int imageX = Convert.ToInt32(breiteGesamt * 0.6);                
                 int imageY = Convert.ToInt32(höheGesamt * 0.25);
                 int linkeSpalteX = Convert.ToInt32(breiteGesamt * 0.05);
@@ -195,8 +195,8 @@ namespace schuelerausweis
                 int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
 
                 PrintDocument pd = new PrintDocument();
-                pd.PrinterSettings.PrinterName = "Magicard Rio Pro";
-                pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", breiteGesamt, höheGesamt);
+                //pd.PrinterSettings.PrinterName = "Magicard Rio Pro";
+                pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", breiteGesamt, höheGesamt);                
                 pd.PrinterSettings.PrintToFile = false;
                 pd.PrinterSettings.PrinterName = "Adobe PDF";
 

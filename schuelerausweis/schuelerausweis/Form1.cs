@@ -26,8 +26,8 @@ namespace schuelerausweis
         string aktiveKlasse = "";
         List<int> listBox1_selection = new List<int>();
 
-        public List<Schueler> schuelerDerAktivenKlasse { get; private set; }
-        public Schueler aktiverSchueler { get; private set; }
+        public List<Schueler> SchuelerDerAktivenKlasse { get; private set; }
+        public Schueler AktiverSchueler { get; private set; }
         
         public Form1()
         {
@@ -114,12 +114,14 @@ namespace schuelerausweis
                 if (lb.Name != "listBoxSchueler")
                 {
                     aktiveKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
-                    schuelerDerAktivenKlasse = (from s in schuelers where s.Klasse == aktiveKlasse select s).ToList();
-                    listBoxSchueler.DataSource = (from s in schuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
+                    SchuelerDerAktivenKlasse = (from s in schuelers
+                                                where !s.Nachname.Contains(s.Klasse)
+                                                where s.Klasse == aktiveKlasse select s).ToList();
+                    listBoxSchueler.DataSource = (from s in SchuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
 
-                    for (int i = 0; i < schuelerDerAktivenKlasse.Count; i++)
+                    for (int i = 0; i < SchuelerDerAktivenKlasse.Count; i++)
                     {
-                        if ((from g in gewählteSchüler where g.Nachname == schuelerDerAktivenKlasse[i].Nachname && g.Vorname == schuelerDerAktivenKlasse[i].Vorname && g.Klasse == schuelerDerAktivenKlasse[0].Klasse select g).Any())
+                        if ((from g in gewählteSchüler where g.Nachname == SchuelerDerAktivenKlasse[i].Nachname && g.Vorname == SchuelerDerAktivenKlasse[i].Vorname && g.Klasse == SchuelerDerAktivenKlasse[0].Klasse select g).Any())
                         {
                             listBoxSchueler.SetSelected(i, true);
                         }
@@ -149,7 +151,7 @@ namespace schuelerausweis
                     for (int i = 0; i < listBoxSchueler.Items.Count; i++)
                     {
                         listBoxSchueler.SetSelected(i, false);
-                        gewählteSchüler.Remove(schuelerDerAktivenKlasse[i]);
+                        gewählteSchüler.Remove(SchuelerDerAktivenKlasse[i]);
                     }
                 }
                 else
@@ -159,9 +161,9 @@ namespace schuelerausweis
                     for (int i = 0; i < listBoxSchueler.Items.Count; i++)
                     {
                         listBoxSchueler.SetSelected(i, true);
-                        if (!(from g in gewählteSchüler where g.Nachname == schuelerDerAktivenKlasse[i].Nachname && g.Vorname == schuelerDerAktivenKlasse[i].Vorname && schuelerDerAktivenKlasse[i].Klasse == g.Klasse select g).Any())
+                        if (!(from g in gewählteSchüler where g.Nachname == SchuelerDerAktivenKlasse[i].Nachname && g.Vorname == SchuelerDerAktivenKlasse[i].Vorname && SchuelerDerAktivenKlasse[i].Klasse == g.Klasse select g).Any())
                         {
-                            gewählteSchüler.Add(schuelerDerAktivenKlasse[i]);
+                            gewählteSchüler.Add(SchuelerDerAktivenKlasse[i]);
                         }
                     }
                 }
@@ -179,73 +181,84 @@ namespace schuelerausweis
             try
             {
                 var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
-                int faktor = 3;
-                int breiteGesamt = Convert.ToInt32(339 * faktor);
+                double faktor = 1;
+                int breiteGesamt = Convert.ToInt32(338 * faktor);
                 int höheGesamt = Convert.ToInt32(214 * faktor);
-                int imageX = Convert.ToInt32(breiteGesamt * 0.6);                
-                int imageY = Convert.ToInt32(höheGesamt * 0.25);
+                int obereLinkeEckeFotoX = Convert.ToInt32(breiteGesamt * 0.6);                
+                int obereLinkeEckeFotoY = Convert.ToInt32(höheGesamt * 0.25);
+                int obereLinkeEckeSchulleiterX = Convert.ToInt32(breiteGesamt * 0.3);
+                int obereLinkeEckeSchulleiterY = Convert.ToInt32(höheGesamt * 0.55);
                 int linkeSpalteX = Convert.ToInt32(breiteGesamt * 0.05);
                 int rechteSpalteX = Convert.ToInt32(breiteGesamt * 0.3);
-                int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt);
-                int zweiteZeileY = Convert.ToInt32(höheGesamt * 0.45);
-                int dritteZeileY = Convert.ToInt32(höheGesamt * 0.6);
+                int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt) +5;
+                int zweiteZeileY = Convert.ToInt32(höheGesamt * 0.45) + 5;
+                int dritteZeileY = Convert.ToInt32(höheGesamt * 0.6) + 5;
                 int imageW = Convert.ToInt32(breiteGesamt * 0.3);
                 int schriftGroß = Convert.ToInt32(höheGesamt * 0.07);
                 int schriftKlein = Convert.ToInt32(höheGesamt * 0.02);
                 int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
+                int fotoHoehe = 110;
 
                 PrintDocument pd = new PrintDocument();
-                //pd.PrinterSettings.PrinterName = "Magicard Rio Pro";
-                pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", breiteGesamt, höheGesamt);                
-                pd.PrinterSettings.PrintToFile = false;
-                pd.PrinterSettings.PrinterName = "Adobe PDF";
+                pd.DefaultPageSettings.Landscape = true;
 
-                //var devmode = pd.PrinterSettings.GetHdevmode();
-                //pd.PrinterSettings.SetHdevmode(devmode);
+                pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", 642, 1016);
+                //pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", höheGesamt, breiteGesamt);
                 
-
-                for (int i = 0; i < g.Count(); i++)
+                PrintDialog printDialog1 = new PrintDialog()
                 {
-                    pd.PrintPage += delegate (object o, PrintPageEventArgs ee)
+                    Document = pd
+                };
+                
+                if (printDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    for (int i = 0; i < g.Count(); i++)
                     {
-                        var img = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                        var loc = new Point(rechteSpalteX, zweiteZeileY + Convert.ToInt32(0.05 * höheGesamt));
-
-                        ee.Graphics.DrawImage(img, loc);
-
-                        ee.Graphics.DrawString("Name/Name", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
-                        ee.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-
-                        ee.Graphics.DrawString("Geburtsdatum/Date of birth", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, zweiteZeileY);
-                        ee.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, zweiteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-
-                        ee.Graphics.DrawString("Gültig bis/Valid until", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
-                        ee.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
-                        
-                        if (gewählteSchüler[i].BildPfad != null)
+                        pd.PrintPage += delegate (object o, PrintPageEventArgs printPageEventArgs)
                         {
-                            Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
-                            Point loc1 = new Point(imageX, imageY);
-                            ee.Graphics.DrawImage(image, loc1);
-                        }
-                        else
-                        {
-                            string text = "Der Ausweis ist nur zusammen mit einem Lichtbildausweis gültig.";
-                            using (Font font = new Font("Tahoma", schriftFoto, FontStyle.Regular, GraphicsUnit.Point))
+                            Graphics graphicsSl = printPageEventArgs.Graphics;
+                            //Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift2.jpg");                            
+                            //graphicsSl.DrawImage(imageSL, 116, 107, 92, 61);
+                            
+                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 30, dritteZeileY + 18);
+                            
+                            if (gewählteSchüler[i].BildPfad != null)
                             {
-                                RectangleF rectF = new RectangleF(imageX, imageY, Convert.ToInt32(breiteGesamt * 0.25), Convert.ToInt32(höheGesamt * 0.55));
-                                StringFormat formatter = new StringFormat()
-                                {
-                                    Alignment = StringAlignment.Center,
-                                    LineAlignment = StringAlignment.Center
-                                };
-                                ee.Graphics.DrawString(text, font, Brushes.Black, rectF, formatter);
-                                ee.Graphics.DrawRectangle(Pens.Black, Rectangle.Round(rectF));
+                                Graphics graphicsFoto = printPageEventArgs.Graphics;
+                                Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
+                                graphicsFoto.DrawImage(image, 250, 58, 76, 101);
                             }
-                        }
-                    };
-                    pd.Print();
+                            else
+                            {
+                                string text = "Der Ausweis ist nur zusammen mit einem Lichtbildausweis gültig.";
+                                using (Font font = new Font("Tahoma", schriftFoto, FontStyle.Regular, GraphicsUnit.Point))
+                                {
+                                    StringFormat formatter = new StringFormat()
+                                    {
+                                        Alignment = StringAlignment.Center,
+                                        LineAlignment = StringAlignment.Center
+                                    };
+                                    RectangleF rectF = new RectangleF(250, 58, 84, 112);
+                                    printPageEventArgs.Graphics.DrawString(text, font, Brushes.Black, rectF, formatter);
+                                }
+                            }
+                            
+                            printPageEventArgs.Graphics.DrawString("Name/Name", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
+                            printPageEventArgs.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+
+                            printPageEventArgs.Graphics.DrawString("Geburtsdatum/Date of birth", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, zweiteZeileY);
+                            printPageEventArgs.Graphics.DrawString(gewählteSchüler[i].Geburtsdatum.ToShortDateString(), new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, zweiteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+
+                            printPageEventArgs.Graphics.DrawString("Gültig bis/Valid until", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
+                            printPageEventArgs.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+                        };
+                        pd.Print();
+                    }
                 }
+                else
+                {
+                    MessageBox.Show("Sie haben den Druckvorgang abgebrochen.");
+                }                   
             }
             catch (Exception ex)
             {

@@ -217,10 +217,10 @@ namespace schuelerausweis
                         pd.PrintPage += delegate (object o, PrintPageEventArgs printPageEventArgs)
                         {
                             Graphics graphics = printPageEventArgs.Graphics;
-                            Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift2.jpg");
-                            graphics.DrawImage(imageSL, 150, 107, 92, 61);
+                            Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
+                            graphics.DrawImage(imageSL, 165, 107, 85, 61);
 
-                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 60, dritteZeileY + 18);
+                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 75, dritteZeileY + 18);
                             
                             if (gewählteSchüler[i].BildPfad != null)
                             {
@@ -238,8 +238,13 @@ namespace schuelerausweis
                                         Alignment = StringAlignment.Center,
                                         LineAlignment = StringAlignment.Center
                                     };
-                                    RectangleF rectF = new RectangleF(250, 58, 84, 112);
-                                    printPageEventArgs.Graphics.DrawString(text, font, Brushes.Black, rectF, formatter);
+                                    Rectangle rect = new Rectangle(250, 58, 76, 101);
+
+                                    Pen pen = new Pen(Color.Black, 1);
+                                    printPageEventArgs.Graphics.DrawRectangle(pen, rect);
+
+                                    printPageEventArgs.Graphics.DrawString(text, font, Brushes.Black, rect, formatter);
+
                                 }
                             }
                             

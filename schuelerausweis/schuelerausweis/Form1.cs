@@ -216,17 +216,17 @@ namespace schuelerausweis
                     {
                         pd.PrintPage += delegate (object o, PrintPageEventArgs printPageEventArgs)
                         {
-                            Graphics graphicsSl = printPageEventArgs.Graphics;
-                            //Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift2.jpg");                            
-                            //graphicsSl.DrawImage(imageSL, 116, 107, 92, 61);
-                            
-                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 30, dritteZeileY + 18);
+                            Graphics graphics = printPageEventArgs.Graphics;
+                            Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift2.jpg");
+                            graphics.DrawImage(imageSL, 150, 107, 92, 61);
+
+                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 60, dritteZeileY + 18);
                             
                             if (gewählteSchüler[i].BildPfad != null)
                             {
-                                Graphics graphicsFoto = printPageEventArgs.Graphics;
+                                graphics = printPageEventArgs.Graphics;
                                 Image image = Image.FromFile(gewählteSchüler[i].BildPfad);
-                                graphicsFoto.DrawImage(image, 250, 58, 76, 101);
+                                graphics.DrawImage(image, 250, 58, 76, 101);
                             }
                             else
                             {

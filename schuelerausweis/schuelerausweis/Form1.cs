@@ -36,10 +36,10 @@ namespace schuelerausweis
         }
         
         private void Form1_Load(object sender, EventArgs e)
-        {
+        {           
             try
             {
-                toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM";
+                toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM                                                                       Zähler : " + Properties.Settings.Default.counter;
                 worker.WorkerReportsProgress = true;
                 worker.WorkerSupportsCancellation = true;
                 worker.DoWork += new DoWorkEventHandler(HandleDoWork);
@@ -58,12 +58,20 @@ namespace schuelerausweis
             try
             {
                 int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
-                klasses = new Klasses(aktSj);
+                klasses = new Klasses(aktSj);                
                 schuelers = new Schuelers(aktSj);
+
+                for (int i = 0; i < klasses.Count; i++)
+                {
+                    if (!(from s in schuelers where s.Klasse == klasses[i].NameAtlantis select s).Any())
+                    {
+                        klasses.Remove(klasses[i]);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                lblStartup.Text = ex.Message;
+                MessageBox.Show(ex.ToString());
             }           
         }
 
@@ -78,7 +86,8 @@ namespace schuelerausweis
 
         private void HandleWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            listBoxKlasse.DataSource = (from k in klasses select k.NameAtlantis).ToList();
+            listBoxKlasse.DataSource = (from k in klasses
+                                        select k.NameAtlantis).ToList();
             listBoxKlasse.SetSelected(0, false);
             lblStartup.Visible = false;         
         }
@@ -116,6 +125,7 @@ namespace schuelerausweis
                     aktiveKlasse = klasses[listBox1_selection[listBox1_selection.Count - 1]].NameAtlantis;
                     SchuelerDerAktivenKlasse = (from s in schuelers
                                                 where !s.Nachname.Contains(s.Klasse)
+                                                where s.Vorname.Length > 1
                                                 where s.Klasse == aktiveKlasse select s).ToList();
                     listBoxSchueler.DataSource = (from s in SchuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
 
@@ -167,6 +177,7 @@ namespace schuelerausweis
                         }
                     }
                 }
+                
                 listBoxSchueler.EndUpdate();
                 RenderButton();
             }
@@ -180,7 +191,7 @@ namespace schuelerausweis
         {
             try
             {
-                var g = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
+                var gewählteS = (gewählteSchüler.AsQueryable().OrderBy(sc => sc.Klasse).ThenBy(sc => sc.Nachname).ThenBy(sc => sc.Vorname));
                 double faktor = 1;
                 int breiteGesamt = Convert.ToInt32(338 * faktor);
                 int höheGesamt = Convert.ToInt32(214 * faktor);
@@ -197,28 +208,28 @@ namespace schuelerausweis
                 int schriftGroß = Convert.ToInt32(höheGesamt * 0.07);
                 int schriftKlein = Convert.ToInt32(höheGesamt * 0.02);
                 int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
-                int fotoHoehe = 110;
-
+               
                 PrintDocument pd = new PrintDocument();
                 pd.DefaultPageSettings.Landscape = true;
 
                 pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", 642, 1016);
-                //pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", höheGesamt, breiteGesamt);
                 
                 PrintDialog printDialog1 = new PrintDialog()
                 {
                     Document = pd
                 };
+
+                printDialog1.PrinterSettings.PrinterName = @"\\ps01\Magicard Rio Pro";
                 
                 if (printDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    for (int i = 0; i < g.Count(); i++)
+                    for (int i = 0; i < gewählteS.Count(); i++)
                     {
                         pd.PrintPage += delegate (object o, PrintPageEventArgs printPageEventArgs)
                         {
                             Graphics graphics = printPageEventArgs.Graphics;
                             Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                            graphics.DrawImage(imageSL, 165, 107, 85, 61);
+                            graphics.DrawImage(imageSL, 165, 100, 85, 61);
 
                             printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 75, dritteZeileY + 18);
                             
@@ -258,7 +269,17 @@ namespace schuelerausweis
                             printPageEventArgs.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
                         };
                         pd.Print();
+                        LogWriter.LogWrite(gewählteSchüler[i].Nachname + "," + gewählteSchüler[i].Vorname + "," + gewählteSchüler[i].Geburtsdatum.ToShortDateString());
                     }
+                    for (int i = 0; i < listBoxSchueler.Items.Count; i++)
+                    {
+                        listBoxSchueler.SetSelected(i, false);
+                    }
+                    Properties.Settings.Default.counter += gewählteSchüler.Count();
+                    Properties.Settings.Default.Save();
+                    gewählteSchüler = new List<Schueler>();
+                    listBoxKlasse.SetSelected(0, false);
+                    RenderButton();
                 }
                 else
                 {
@@ -268,7 +289,8 @@ namespace schuelerausweis
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
-            }            
+            }
+            toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM                                                                       Zähler : " + Properties.Settings.Default.counter;
         }
         
         private void ListBoxSchueler_Click(object sender, EventArgs e)

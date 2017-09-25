@@ -94,5 +94,17 @@ namespace schuelerausweis.Properties {
                 this["InitialDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int counter {
+            get {
+                return ((int)(this["counter"]));
+            }
+            set {
+                this["counter"] = value;
+            }
+        }
     }
 }

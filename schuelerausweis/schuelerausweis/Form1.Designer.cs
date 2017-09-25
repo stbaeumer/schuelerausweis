@@ -127,6 +127,8 @@
             this.Controls.Add(this.statusStrip1);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximumSize = new System.Drawing.Size(392, 407);
+            this.MinimumSize = new System.Drawing.Size(392, 407);
             this.Name = "Form1";
             this.Text = "Schülerausweise drucken";
             this.Load += new System.EventHandler(this.Form1_Load);

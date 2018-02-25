@@ -25,21 +25,22 @@ namespace schuelerausweis
         List<Schueler> gewählteSchüler = new List<Schueler>();
         string aktiveKlasse = "";
         List<int> listBox1_selection = new List<int>();
+        string Version = "20170926";
 
         public List<Schueler> SchuelerDerAktivenKlasse { get; private set; }
         public Schueler AktiverSchueler { get; private set; }
-        
+
         public Form1()
         {
             InitializeComponent();
             _syncContext = SynchronizationContext.Current;
         }
-        
+
         private void Form1_Load(object sender, EventArgs e)
-        {           
+        {
             try
             {
-                toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM                                                                       Zähler : " + Properties.Settings.Default.counter;
+                toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " Stefan Bäumer          Zähler: " + Properties.Settings.Default.counter.ToString().PadRight(5) + "                         Version " + Version;
                 worker.WorkerReportsProgress = true;
                 worker.WorkerSupportsCancellation = true;
                 worker.DoWork += new DoWorkEventHandler(HandleDoWork);
@@ -50,29 +51,61 @@ namespace schuelerausweis
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }            
+            }
         }
 
         private void HandleDoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
-                klasses = new Klasses(aktSj);                
-                schuelers = new Schuelers(aktSj);
-
-                for (int i = 0; i < klasses.Count; i++)
+                PrinterSettings printer = new PrinterSettings()
                 {
-                    if (!(from s in schuelers where s.Klasse == klasses[i].NameAtlantis select s).Any())
+                    PrinterName = @"Magicard Rio Pro (V2)"
+                };
+
+                if (printer.IsValid)
+                {
+                    Console.WriteLine("Supported Resolutions:");
+
+                    foreach (PrinterResolution resolution in
+                      printer.PrinterResolutions)
                     {
-                        klasses.Remove(klasses[i]);
+                        Console.WriteLine("  {0}", resolution);
                     }
+                    Console.WriteLine();
+
+                    // Display the list of valid paper sizes.
+                    Console.WriteLine("Supported Paper Sizes:");
+
+                    foreach (PaperSize size in printer.PaperSizes)
+                    {
+                        if (Enum.IsDefined(size.Kind.GetType(), size.Kind))
+                        {
+                            Console.WriteLine("  {0}", size);
+                        }
+                    }
+                    int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
+                    klasses = new Klasses(aktSj);
+                    schuelers = new Schuelers(aktSj);
+
+                    for (int i = 0; i < klasses.Count; i++)
+                    {
+                        if (!(from s in schuelers where s.Klasse == klasses[i].NameAtlantis select s).Any())
+                        {
+                            klasses.Remove(klasses[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("Der Drucker ist nicht bereit. \n\nIst der Drucker '" + printer.PrinterName + "' installiert und eingeschaltet? \n\nIst das Netzwerkkabel eingesteckt? \n\nDer Drucker hat die IP 192.168.134.164");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
-            }           
+                MessageBox.Show(ex.Message);
+                Application.Exit();
+            }
         }
 
         private void HandleProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -89,7 +122,7 @@ namespace schuelerausweis
             listBoxKlasse.DataSource = (from k in klasses
                                         select k.NameAtlantis).ToList();
             listBoxKlasse.SetSelected(0, false);
-            lblStartup.Visible = false;         
+            lblStartup.Visible = false;
         }
 
         private void ListBoxKlasse_Click(object sender, EventArgs e)
@@ -106,7 +139,7 @@ namespace schuelerausweis
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }            
+            }
         }
 
         private void TrackSelectionChange(ListBox lb, List<int> selection)
@@ -126,7 +159,8 @@ namespace schuelerausweis
                     SchuelerDerAktivenKlasse = (from s in schuelers
                                                 where !s.Nachname.Contains(s.Klasse)
                                                 where s.Vorname.Length > 1
-                                                where s.Klasse == aktiveKlasse select s).ToList();
+                                                where s.Klasse == aktiveKlasse
+                                                select s).ToList();
                     listBoxSchueler.DataSource = (from s in SchuelerDerAktivenKlasse select s.Nachname + ", " + s.Vorname).ToList();
 
                     for (int i = 0; i < SchuelerDerAktivenKlasse.Count; i++)
@@ -145,7 +179,7 @@ namespace schuelerausweis
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }                             
+            }
         }
 
         private void BtnAlle_Click(object sender, EventArgs e)
@@ -177,16 +211,16 @@ namespace schuelerausweis
                         }
                     }
                 }
-                
+
                 listBoxSchueler.EndUpdate();
                 RenderButton();
             }
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }            
+            }
         }
-        
+
         private void BtnDrucken_Click(object sender, EventArgs e)
         {
             try
@@ -195,32 +229,32 @@ namespace schuelerausweis
                 double faktor = 1;
                 int breiteGesamt = Convert.ToInt32(338 * faktor);
                 int höheGesamt = Convert.ToInt32(214 * faktor);
-                int obereLinkeEckeFotoX = Convert.ToInt32(breiteGesamt * 0.6);                
+                int obereLinkeEckeFotoX = Convert.ToInt32(breiteGesamt * 0.6);
                 int obereLinkeEckeFotoY = Convert.ToInt32(höheGesamt * 0.25);
                 int obereLinkeEckeSchulleiterX = Convert.ToInt32(breiteGesamt * 0.3);
                 int obereLinkeEckeSchulleiterY = Convert.ToInt32(höheGesamt * 0.55);
                 int linkeSpalteX = Convert.ToInt32(breiteGesamt * 0.05);
                 int rechteSpalteX = Convert.ToInt32(breiteGesamt * 0.3);
-                int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt) +5;
+                int ersteZeileY = Convert.ToInt32(0.3 * höheGesamt) + 5;
                 int zweiteZeileY = Convert.ToInt32(höheGesamt * 0.45) + 5;
                 int dritteZeileY = Convert.ToInt32(höheGesamt * 0.6) + 5;
                 int imageW = Convert.ToInt32(breiteGesamt * 0.3);
                 int schriftGroß = Convert.ToInt32(höheGesamt * 0.07);
                 int schriftKlein = Convert.ToInt32(höheGesamt * 0.02);
                 int schriftFoto = Convert.ToInt32(höheGesamt * 0.035);
-               
+
                 PrintDocument pd = new PrintDocument();
                 pd.DefaultPageSettings.Landscape = true;
 
                 pd.DefaultPageSettings.PaperSize = new PaperSize("CR80-Karte", 642, 1016);
-                
+
                 PrintDialog printDialog1 = new PrintDialog()
                 {
                     Document = pd
                 };
 
-                printDialog1.PrinterSettings.PrinterName = @"\\ps01\Magicard Rio Pro";
-                
+                printDialog1.PrinterSettings.PrinterName = @"Magicard Rio Pro (V2)";
+
                 if (printDialog1.ShowDialog() == DialogResult.OK)
                 {
                     for (int i = 0; i < gewählteS.Count(); i++)
@@ -229,10 +263,10 @@ namespace schuelerausweis
                         {
                             Graphics graphics = printPageEventArgs.Graphics;
                             Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
-                            graphics.DrawImage(imageSL, 165, 100, 85, 61);
+                            graphics.DrawImage(imageSL, 170, 100, 80, 61);
 
                             printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 75, dritteZeileY + 18);
-                            
+
                             if (gewählteSchüler[i].BildPfad != null)
                             {
                                 graphics = printPageEventArgs.Graphics;
@@ -258,7 +292,7 @@ namespace schuelerausweis
 
                                 }
                             }
-                            
+
                             printPageEventArgs.Graphics.DrawString("Name/Name", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, ersteZeileY);
                             printPageEventArgs.Graphics.DrawString(gewählteSchüler[i].Vorname + " " + gewählteSchüler[i].Nachname, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, ersteZeileY + Convert.ToInt32(0.01 * höheGesamt));
 
@@ -267,6 +301,7 @@ namespace schuelerausweis
 
                             printPageEventArgs.Graphics.DrawString("Gültig bis/Valid until", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, linkeSpalteX, dritteZeileY);
                             printPageEventArgs.Graphics.DrawString(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(gewählteSchüler[i].EntlassdatumVoraussichtlich.Month) + " " + gewählteSchüler[i].EntlassdatumVoraussichtlich.Year, new Font("Tahoma", schriftGroß, FontStyle.Regular), Brushes.Black, linkeSpalteX, dritteZeileY + Convert.ToInt32(0.01 * höheGesamt));
+                            
                         };
                         pd.Print();
                         LogWriter.LogWrite(gewählteSchüler[i].Nachname + "," + gewählteSchüler[i].Vorname + "," + gewählteSchüler[i].Geburtsdatum.ToShortDateString());
@@ -284,15 +319,16 @@ namespace schuelerausweis
                 else
                 {
                     MessageBox.Show("Sie haben den Druckvorgang abgebrochen.");
-                }                   
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
-            toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM                                                                       Zähler : " + Properties.Settings.Default.counter;
+
+            toolStripStatusLabel1.Text = "© " + DateTime.Now.Year + " BM                         Zähler: " + Properties.Settings.Default.counter.ToString().PadRight(5) + "                         Version " + Version;
         }
-        
+
         private void ListBoxSchueler_Click(object sender, EventArgs e)
         {
             try
@@ -318,7 +354,7 @@ namespace schuelerausweis
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }            
+            }
         }
 
         private void RenderButton()
@@ -328,19 +364,36 @@ namespace schuelerausweis
                 if (gewählteSchüler.Count > 0)
                 {
                     btnDrucken.Enabled = true;
-                    int anzahl = (gewählteSchüler.Select(x => x.Klasse).Distinct().Count());
-                    btnDrucken.Text = gewählteSchüler.Count + " Schüler aus " + anzahl + " Klasse" + (anzahl == 1 ? "" : "n") + " drucken.";
+
+                    string klassen = "";
+
+                    foreach (var klasse in (gewählteSchüler.Select(x => x.Klasse).Distinct()))
+                    {
+                        klassen += klasse + ", ";
+                    }
+                    klassen = klassen.TrimEnd(' ');
+                    klassen = klassen.TrimEnd(',');
+
+                    if ((gewählteSchüler.Select(x => x.Klasse).Distinct().Count() == 1))
+                    {
+                        klassen = "der Klasse " + klassen;
+                    }
+                    else
+                    {
+                        klassen = "den Klassen " + klassen;
+                    }
+                    btnDrucken.Text = "Hier klicken, um " + gewählteSchüler.Count + " Schüler aus " + klassen + " zu drucken.";
                 }
                 else
                 {
                     btnDrucken.Enabled = false;
-                    btnDrucken.Text = "DRUCKEN";
+                    btnDrucken.Text = "Wählen Sie einen oder mehrere Schüler!";
                 }
             }
             catch (Exception ex)
             {
                 lblStartup.Text = ex.Message;
-            }            
-        }        
+            }
+        }
     }
 }

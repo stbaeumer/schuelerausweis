@@ -14,12 +14,12 @@ namespace schuelerausweis
         public static void LogWrite(string logMessage)
         {
             m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (!File.Exists("C:\\Schuelerausweis\\log.txt"))
-                File.Create("C:\\Schuelerausweis\\log.txt");
+            if (!File.Exists("\\\\fs01\\Schuelerausweis\\log.txt"))
+                File.Create("\\\\fs01\\Schuelerausweis\\log.txt");
 
             try
             {
-                using (StreamWriter w = File.AppendText("C:\\Schuelerausweis\\log.txt"))
+                using (StreamWriter w = File.AppendText("\\\\fs01\\Schuelerausweis\\log.txt"))
                     AppendLog(logMessage, w);
             }
             catch (Exception ex)

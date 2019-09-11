@@ -86,8 +86,9 @@ namespace schuelerausweis
                     }
                     int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
                     klasses = new Klasses(aktSj);
+                    MessageBox.Show(klasses.Count() + " Klassen");
                     schuelers = new Schuelers(aktSj);
-
+                    MessageBox.Show(schuelers.Count() + " Schüler");
                     for (int i = 0; i < klasses.Count; i++)
                     {
                         if (!(from s in schuelers where s.Klasse == klasses[i].NameAtlantis select s).Any())
@@ -265,7 +266,7 @@ namespace schuelerausweis
                             Image imageSL = Image.FromFile(@"\\\\fs01\\SoftwarehausHeider\\Atlantis\\Dokumente\\jpg\\schulleiterUnterschrift.jpg");
                             graphics.DrawImage(imageSL, 170, 100, 80, 61);
 
-                            printPageEventArgs.Graphics.DrawString("Schulleiter/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 75, dritteZeileY + 18);
+                            printPageEventArgs.Graphics.DrawString("Schulleiterin/Headmaster", new Font("Tahoma", schriftKlein, FontStyle.Italic), Brushes.Black, obereLinkeEckeSchulleiterX + 75, dritteZeileY + 18);
 
                             if (gewählteSchüler[i].BildPfad != null)
                             {

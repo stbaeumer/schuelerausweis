@@ -25,7 +25,7 @@ namespace schuelerausweis
         List<Schueler> gewählteSchüler = new List<Schueler>();
         string aktiveKlasse = "";
         List<int> listBox1_selection = new List<int>();
-        string Version = "20170926";
+        string Version = "20190911";
 
         public List<Schueler> SchuelerDerAktivenKlasse { get; private set; }
         public Schueler AktiverSchueler { get; private set; }
@@ -86,9 +86,9 @@ namespace schuelerausweis
                     }
                     int aktSj = DateTime.Now.Month >= 8 ? DateTime.Now.Year : DateTime.Now.AddYears(-1).Year;
                     klasses = new Klasses(aktSj);
-                    MessageBox.Show(klasses.Count() + " Klassen");
+                    //MessageBox.Show(klasses.Count() + " Klassen");
                     schuelers = new Schuelers(aktSj);
-                    MessageBox.Show(schuelers.Count() + " Schüler");
+                    //MessageBox.Show(schuelers.Count() + " Schüler");
                     for (int i = 0; i < klasses.Count; i++)
                     {
                         if (!(from s in schuelers where s.Klasse == klasses[i].NameAtlantis select s).Any())

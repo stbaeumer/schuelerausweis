@@ -14,7 +14,7 @@ namespace schuelerausweis
     {
         public Schuelers(int aktSj)
         {
-            var connetionStringAtlantis = @"Dsn=Atlantis9;uid=DBA";
+            var connetionStringAtlantis = @"Dsn=Atlantis17;uid=DBA";
             var bildDateien = Directory.GetFiles(@"\\fs01\SoftwarehausHeider\Atlantis\Dokumente\jpg", "*.jpg", SearchOption.AllDirectories).ToList();
 
             using (OdbcConnection connection = new OdbcConnection(connetionStringAtlantis))
@@ -45,6 +45,10 @@ WHERE DBA.schue_sj.vorgang_schuljahr = '" + aktSjAtlantis + "' ORDER BY DBA.schu
                             schueler.Jahrgang = theRow["jahrgang"] == null ? "" : theRow["jahrgang"].ToString();
                             //schueler.KlasseNameAtlantis = schueler.GetAktuellOderZuletztBesuchteKlasse(theRow["x"] == null ? "" : theRow["x"].ToString());
                             schueler.Klasse = theRow["klasse"] == null ? "" : theRow["klasse"].ToString();
+                            if (schueler.Klasse.StartsWith("DD"))
+                            {
+                                string asss = "";
+                            }
                             //if (schueler.Klasse.Schuelers != null) schueler.Klasse.Schuelers.Add(schueler);
                             //schueler.Id = schueler.GetIdFromBarcode(theRow["x"] == null ? "" : theRow["x"].ToString());
                             //schueler.Alias = schueler.generateAlias();

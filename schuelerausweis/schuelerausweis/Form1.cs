@@ -60,7 +60,8 @@ namespace schuelerausweis
             {
                 PrinterSettings printer = new PrinterSettings()
                 {
-                    PrinterName = @"Magicard Rio Pro (V2)"
+                    //PrinterName = @"1023-Magicard Rio Pro (V2)"
+                    PrinterName = @"\\ps01\1023-Magicard"
                 };
 
                 if (printer.IsValid)
@@ -119,6 +120,7 @@ namespace schuelerausweis
 
         private void HandleWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            MessageBox.Show("Anzahl der Klassen: " + klasses.Count);
             listBoxKlasse.DataSource = (from k in klasses
                                         select k.NameAtlantis).ToList();
             listBoxKlasse.SetSelected(0, false);

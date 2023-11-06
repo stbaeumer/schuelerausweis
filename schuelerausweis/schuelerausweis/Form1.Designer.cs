@@ -53,7 +53,8 @@
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(376, 22);
             this.statusStrip1.TabIndex = 12;
-            this.statusStrip1.Text = "statusStrip1";
+            this.statusStrip1.Text = "Hallo";
+            this.statusStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip1_ItemClicked);
             // 
             // toolStripStatusLabel1
             // 
@@ -112,6 +113,7 @@
             this.lblStartup.TabIndex = 27;
             this.lblStartup.Text = "Daten werden geladen\r\nBitte warten ...";
             this.lblStartup.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblStartup.Click += new System.EventHandler(this.lblStartup_Click);
             // 
             // Form1
             // 

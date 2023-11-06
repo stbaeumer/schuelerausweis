@@ -14,7 +14,7 @@ namespace schuelerausweis
     {
         public Schuelers(int aktSj)
         {
-            var connetionStringAtlantis = @"Dsn=Atlantis17;uid=DBA";
+            var connetionStringAtlantis = @"Dsn=Atlantis17u;uid=DBA";
             var bildDateien = Directory.GetFiles(@"\\fs01\SoftwarehausHeider\Atlantis\Dokumente\jpg", "*.jpg", SearchOption.AllDirectories).ToList();
 
             using (OdbcConnection connection = new OdbcConnection(connetionStringAtlantis))

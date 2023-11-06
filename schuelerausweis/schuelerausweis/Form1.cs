@@ -25,7 +25,7 @@ namespace schuelerausweis
         List<Schueler> gewählteSchüler = new List<Schueler>();
         string aktiveKlasse = "";
         List<int> listBox1_selection = new List<int>();
-        string Version = "20230606";
+        string Version = "20230801";
 
         public List<Schueler> SchuelerDerAktivenKlasse { get; private set; }
         public Schueler AktiverSchueler { get; private set; }
@@ -396,6 +396,16 @@ namespace schuelerausweis
             {
                 lblStartup.Text = ex.Message;
             }
+        }
+
+        private void lblStartup_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 }

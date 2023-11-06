@@ -1,6 +1,7 @@
 # Schuelerausweise drucken #
 
-Mit ***Schuelerausweis*** können Sie Schülerausweise im Scheckkartenformat auf einem **Magicard Rio Pro (V2)**  drucken. 
+Mit ***Schuelerausweis*** können Schülerausweise im Scheckkartenformat auf einem **Magicard Rio Pro (V2)**  gedruckt werden. 
+Die Klassen und die darin enthaltenen Schülerinnen und Schüler werden mit ***Schuelerausweis*** aus Atlantis ausgelesen.
 
 ## Hauptseite ##
 
